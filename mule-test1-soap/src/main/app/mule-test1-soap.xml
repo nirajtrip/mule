@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="EE-3.5.2"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+
+	<spring:beans>
+		<spring:bean id="productCatalogService" 
+				name="productCatalogService" 
+				class="com.myorg.example.catalog.ProductCatalogServiceImpl" 
+				scope="singleton"/>    			
+		<!--  
+        <spring:import resource="catalogContext.xml"/>
+        -->
+    </spring:beans>    
+
+	<flow name="cxfWebserviceFlow1" doc:name="cxfWebserviceFlow1">
+	
+        <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" path="cxfwebservice" doc:name="HTTP">
+          <cxf:jaxws-service doc:name="SOAP" serviceClass="com.myorg.ws.CXFWebservice" /> 
+        </http:inbound-endpoint>
+        <logger message="cxfWebserviceFlow1: Payload: #[message.payload]" level="INFO" doc:name="Logger"/>
+        <component class="com.myorg.ws.CXFWebserviceImpl" doc:name="Java" />
+    </flow>
+
+
+	<flow name="cxfWebserviceFlow2" doc:name="cxfWebserviceFlow2">
+        <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" path="cxfwsclient" doc:name="HTTP"/>
+        <logger message="cxfWebserviceFlow2: Payload: #[message.payload]" level="INFO" doc:name="Logger"/>
+        <set-payload value="mySampleTestPayload" doc:name="Set Payload"/>
+        <cxf:jaxws-client doc:name="ServiceClient" serviceClass="com.myorg.ws.CXFWebservice" operation="sayHello"/>
+        
+    </flow>
+    
+    <!-- *** Description:
+			To ensure that the service is running, open up your web browser and go to the following URL:
+			http://localhost:8082/services/ProductCatalogService?wsdl
+			
+			You should see the WSDL file that has been generated for our service.
+			Related classes:
+				1) the interface for our service
+				2) the implementation class for our service
+				3) our product bean
+     ***-->
+	<flow name="ProductCatalogService" doc:name="ProductCatalogService">
+      <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8082" path="services/ProductCatalogService" doc:name="HTTP"/>
+		  <component>
+              <spring-object bean="productCatalogService" />
+      </component>        
+	</flow>
+    
+</mule>
