@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:axis="http://www.mulesoft.org/schema/mule/axis"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="EE-3.5.2"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/axis http://www.mulesoft.org/schema/mule/axis/current/mule-axis.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+
+	<spring:bean id="FooBean" class="com.myorg.component.FooComponent" />
+
+	<flow name="testComponentFow" doc:name="testComponentFow">
+        
+    	<http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" path="java" doc:name="HTTP"/>
+
+		<logger message="testComponentFow: Payload: #[payload:java.lang.String]" level="INFO" doc:name="Logger"/>
+        <expression-filter expression="#[!payload.contains('favicon.ico')]" doc:name="Expression"/>
+        <component class="com.myorg.component.SampleComponent" doc:name="Java"/>
+        
+    </flow>
+
+	<flow name="testFooComponentFow" doc:name="testFooComponentFow">
+        
+    	<http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8082" path="java" doc:name="HTTP"/>
+
+		<logger message="testFooComponentFow Payload: #[payload:java.lang.String]" level="INFO" doc:name="Logger"/>
+        <expression-filter expression="#[!payload.contains('favicon.ico')]" doc:name="Expression"/>
+		<component doc:name="Java">
+            <method-entry-point-resolver>
+                <include-entry-point method="fooBar" />
+            </method-entry-point-resolver>
+            <spring-object bean="FooBean" />
+        </component>          
+    </flow>
+    
+</mule>
