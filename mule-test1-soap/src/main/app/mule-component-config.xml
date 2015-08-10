@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="EE-3.5.2"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+
+	<flow name="javaFlow1" doc:name="javaFlow1">
+        
+    	<http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" path="java" doc:name="HTTP"/>
+
+		<!--Construct a String array with 2 elements from request parameters.-->
+		<expression-transformer>
+			<return-argument expression="inbound:user" evaluator="header"/>
+			<return-argument expression="inbound:dept" evaluator="header"/>
+		</expression-transformer>
+        <component doc:name="Java">
+            <singleton-object class="com.myorg.java.ReflectionEntryPointResolverExample"/>
+        </component>
+        <echo-component doc:name="Echo"/>
+
+		<!--Construct a String element from request parameter.-->
+		<expression-transformer>
+			<return-argument expression="inbound:user" evaluator="header"/>
+		</expression-transformer>
+        <component doc:name="Java">
+            <singleton-object class="com.myorg.java.ReflectionEntryPointResolverExample"/>
+        </component>
+        <echo-component doc:name="Echo"/>
+
+		<!-- Make request payload null using groovy expression -->
+		<expression-transformer evaluator="groovy" expression="return null;"/>
+        <component doc:name="Java">
+            <singleton-object class="com.myorg.java.ReflectionEntryPointResolverExample"/>
+        </component>
+
+        <expression-transformer evaluator="string" expression="Successfully completed Reflection Entry Point Resolver flow. Please check your log messages for output." />
+        
+    </flow>
+
+</mule>
