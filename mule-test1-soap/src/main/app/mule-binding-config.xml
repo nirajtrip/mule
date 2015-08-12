@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:axis="http://www.mulesoft.org/schema/mule/axis"
+	xmlns:jersey="http://www.mulesoft.org/schema/mule/jersey"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="EE-3.5.2"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/axis http://www.mulesoft.org/schema/mule/axis/current/mule-axis.xsd 
+http://www.mulesoft.org/schema/mule/jersey http://www.mulesoft.org/schema/mule/jersey/current/mule-jersey.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+	<flow name="jersey-rest-flow" doc:name="jersey-rest-flow">
+
+	    <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8101" doc:name="HTTP" />
+	    <logger message="Message Received - #[payload]" level="INFO" doc:name="Logger" />
+	    <jersey:resources doc:name="REST">
+        	<component class="com.myorg.binding.SampleTest">
+            	<binding interface="com.myorg.binding.DBOperations" method="create">
+                	<vm:outbound-endpoint exchange-pattern="request-response" path="create-data-vm" />
+            	</binding>
+            	<binding interface="com.myorg.binding.DBOperations" method="read">
+                	<vm:outbound-endpoint exchange-pattern="request-response" path="read-data-vm" />
+            	</binding>
+            	<binding interface="com.myorg.binding.DBOperations" method="update">
+                	<vm:outbound-endpoint exchange-pattern="request-response" path="update-data-vm" />
+            	</binding>
+            	<binding interface="com.myorg.binding.DBOperations" method="delete">
+            	    <vm:outbound-endpoint exchange-pattern="request-response" path="delete-data-vm" />
+        	    </binding>
+    	    </component>
+	    </jersey:resources>
+	</flow>
+
+	<flow name="vm.testFlow" doc:name="vm.testFlow">
+	    <vm:inbound-endpoint path="create-data-vm" exchange-pattern="request-response" doc:name="VM"/> 
+	    <logger message="vm.testFlow: Request Received - #[payload]" level="INFO" doc:name="Logger" />
+	</flow>
+
+	<flow name="bindingExampleFlow" doc:name="bindingExampleFlow">
+    	<http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8083" path="java" doc:name="HTTP"/>
+
+		<logger message="bindingExampleFlow Payload: #[payload:java.lang.String]" level="INFO" doc:name="Logger"/>
+		<component class="com.myorg.binding.InvokerComponent">
+        	<binding interface="com.myorg.binding.HelloInterface" method="sayHello">
+                	<vm:outbound-endpoint exchange-pattern="request-response" path="create-data-vm" />
+        	</binding>
+    	</component>    
+		
+	    <logger message="vm.testFlow: Request Received - #[payload]" level="INFO" doc:name="Logger" />
+	</flow>
+
+	<flow name="bindingScriptExampleFlow" doc:name="bindingScriptExampleFlow">
+    	<http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8084" path="java" doc:name="HTTP"/>
+
+		<logger message="bindingScriptExampleFlow Payload: #[payload:java.lang.String]" level="INFO" doc:name="Logger"/>
+		
+		<script:component>
+        	<script:script engine="groovy">
+            return "Total: " + AdditionService.add(1,2)
+        	</script:script>
+        	<script:java-interface-binding interface="org.mule.tck.services.AdditionService" method="add">
+            	<vm:outbound-endpoint path="create-data-vm" synchronous="true"/>
+        	</script:java-interface-binding>
+    	</script:component>
+		
+	    <logger message="vm.testFlow: Request Received - #[payload]" level="INFO" doc:name="Logger" />
+	</flow>
+
+</mule>
