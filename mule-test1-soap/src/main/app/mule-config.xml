@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="EE-3.5.2"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd 
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+
+  <flow name="muleTest-requestReply-Flow" doc:name="mule-Test-for-requestReply-Flow">
+	    <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" path="test" doc:name="HTTP" />
+	    <request-reply doc:name="Request-Reply">
+	      <vm:outbound-endpoint exchange-pattern="one-way" path="req" doc:name="VM" />
+	      <vm:inbound-endpoint exchange-pattern="one-way" path="res" doc:name="VM" />
+	    </request-reply>
+	    <logger message=" Message payload after Outbound  #[message.payload] and Thread is #[Thread.currentThread().getName()] and Thread ID is #[Thread.currentThread().getId()]" level="INFO" doc:name="Logger" />
+	    <object-to-string-transformer doc:name="Object to String" />
+      <json:object-to-json-transformer doc:name="Object to JSON"/>
+  </flow>
+  
+  <flow name="mule-request-replyFlow" doc:name="mule-request-replyFlow">
+
+    <vm:inbound-endpoint exchange-pattern="one-way" path="req" doc:name="VM" />
+    <http:outbound-endpoint exchange-pattern="request-response" method="GET" address="http://services.groupkt.com/country/get/iso3code/IND" doc:name="HTTP" />
+    <object-to-string-transformer doc:name="Object to String" />
+    <logger message="Response Handler Payload is #[message.payload] and Thread ID is #[Thread.currentThread().getId()]" level="INFO" doc:name="Logger" />
+    <vm:outbound-endpoint exchange-pattern="one-way" path="res" doc:name="VM" />
+  </flow>
+  
+</mule>
