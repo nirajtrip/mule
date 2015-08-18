@@ -32,12 +32,19 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 
 		<logger message="testFooComponentFow Payload: #[payload:java.lang.String]" level="INFO" doc:name="Logger"/>
         <expression-filter expression="#[!payload.contains('favicon.ico')]" doc:name="Expression"/>
-		<component doc:name="Java">
+	<component doc:name="Java">
             <method-entry-point-resolver>
                 <include-entry-point method="fooBar" />
             </method-entry-point-resolver>
             <spring-object bean="FooBean" />
         </component>          
+        
+	<component doc:name="Java">
+            <property-entry-point-resolver acceptVoidMethods="true" property="user"/>
+            <spring-object bean="FooBean" />
+        </component>          
+	<logger message="Request processed. Payload: #[payload:java.lang.String]" level="INFO" doc:name="Logger" />
+        
     </flow>
     
 </mule>
