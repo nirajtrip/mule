@@ -16,6 +16,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 
 
+	<https:connector name="NoSessionConnector">
+		<service-overrides sessionHandler="org.mule.session.NullSessionHandler" />
+	</https:connector>
+
   <flow name="muleTest-requestReply-Flow" doc:name="mule-Test-for-requestReply-Flow">
 	    <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" path="test" doc:name="HTTP" />
 	    <request-reply doc:name="Request-Reply">
