@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp"
+	xmlns:objectstore="http://www.mulesoft.org/schema/mule/objectstore" 
+	xmlns:https="http://www.mulesoft.org/schema/mule/https" 
+	xmlns:janrain="http://www.mulesoft.org/schema/mule/janrain" 
+	xmlns:dynamodb="http://www.mulesoft.org/schema/mule/dynamodb" 
+	xmlns:core="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit"
+	version="EE-3.5.2"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd 
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd 
+http://www.mulesoft.org/schema/mule/objectstore http://www.mulesoft.org/schema/mule/objectstore/current/mule-objectstore.xsd
+http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/janrain http://www.mulesoft.org/schema/mule/janrain/current/mule-janrain.xsd
+http://www.mulesoft.org/schema/mule/dynamodb http://www.mulesoft.org/schema/mule/dynamodb/current/mule-dynamodb.xsd
+">
+
+<spring:beans>
+	  <spring:bean id="jacksonObjectMapper" class="org.codehaus.jackson.map.ObjectMapper" />
+	  <spring:bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	  		<spring:property name="targetObject" ref="jacksonObjectMapper" />
+	     	<spring:property name="targetMethod" value="configure" />
+	     	<spring:property name="arguments">
+	     		<spring:list>
+					<spring:value type="org.codehaus.jackson.map.DeserializationConfig.Feature">FAIL_ON_UNKNOWN_PROPERTIES</spring:value>
+					<spring:value>false</spring:value>
+				</spring:list>
+			</spring:property>
+		</spring:bean>		
+		<spring:bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	  		<spring:property name="targetObject" ref="jacksonObjectMapper" />
+	     	<spring:property name="targetMethod" value="configure" />
+	     	<spring:property name="arguments">
+	     		<spring:list>
+					<spring:value type="org.codehaus.jackson.map.DeserializationConfig.Feature">ACCEPT_SINGLE_VALUE_AS_ARRAY</spring:value>
+					<spring:value>true</spring:value>
+				</spring:list>
+			</spring:property>
+		</spring:bean>
+	</spring:beans>
+	
+	<scripting:transformer name="throwValidationException">
+		<scripting:script engine="Groovy">
+			<scripting:text><![CDATA[throw new com.myorg.eai.validation.ValidationException()]]></scripting:text>
+		</scripting:script>
+	</scripting:transformer>
+	
+	</mule>
+	
